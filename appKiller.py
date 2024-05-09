@@ -40,7 +40,6 @@ def nao():
     janela.after(2500, janela.destroy)  # após 5seg, executa a função da referencia no 2° argumento
     janela.mainloop()  # abre a imagem
 
-p = ['VALORANT-Win64-Shipping.exe', 'steam.exe', 'Discord.exe', 'launcher.exe', 'RemoteMouseService.exe']
 pid = int()
 pids = list()
 semana = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -67,6 +66,8 @@ else:
     estado = False
 
 while tempo_agr <= tempo2:
+    with open('programs.txt','r') as arquivo:
+        p = arquivo.read().split()
     if estado == True:
         print(tempo_agr, tempo1, tempo2)
         if tempo1 <= tempo_agr:
@@ -104,3 +105,4 @@ while tempo_agr <= tempo2:
             estado = True
     else:
         estado = False
+
