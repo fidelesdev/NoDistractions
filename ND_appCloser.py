@@ -1,16 +1,22 @@
 from time import sleep
 from datetime import datetime
-
-# from os import system as sys
-# from tkinter import Tk, Label
 from psutil import process_iter, pid_exists
-
-# from PIL import Image, ImageTk
 import subprocess
+from os import path, getcwd
+
+# verificar a url atual para obter os arquivos. a url atual do appCloser muda se for iniciada diretamente ou pela interface
+pastaAtual = str(path.basename(getcwd()))
+if pastaAtual == "ND_appCloser": 
+    urlConfig = r"..\config.txt" #pasta anterior
+    urlPrograms = r"..\programs.txt" #pasta anterior
+else:
+    urlConfig = "config.txt" #mesma pasta
+    urlPrograms = "programs.txt" #mesma pasta
+
+print(urlConfig)
+print(urlPrograms)
 
 # retorna uma lista com os pids dos programas
-
-
 def get_pid(p):
     pidlist = []
     for proc in process_iter(["pid", "name"]):
@@ -61,13 +67,13 @@ def get_hora():
 #         janela.mainloop()  # abre a imagem
 #     except:
 #         pass
-    
 
 
 pid = int()
 pids = list()
-semana = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-with open("..\config.txt", "r") as arquivo:
+semana = ["Sunday", "Monday", "Tuesday",
+          "Wednesday", "Thursday", "Friday", "Saturday"]
+with open(urlConfig, "r") as arquivo:
     config = arquivo.read().split()
 
 
@@ -92,7 +98,7 @@ else:
 
 acessoNegado = []
 while tempo_agr <= tempo2:
-    with open("..\programs.txt", "r") as arquivo:
+    with open(urlPrograms, "r") as arquivo:
         pBruto = arquivo.read().split()
         p = list(map(addExe, pBruto))
     if estado == True:
