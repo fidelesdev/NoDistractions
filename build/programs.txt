@@ -1,6 +1,0 @@
-VALORANT-Win64-Shipping.exe
-steam.exe
-Discord.exe
-launcher.exe
-xampp-control.exe
-appKiller.exe

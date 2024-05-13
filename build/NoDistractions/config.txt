@@ -1,0 +1,12 @@
+True
+00
+00
+23
+59
+True
+True
+False
+False
+False
+False
+False
