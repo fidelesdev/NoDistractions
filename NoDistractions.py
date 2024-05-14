@@ -113,8 +113,8 @@ layout = [
 
 
 window = sg.Window(
-    "config", layout, size=(282, 210)
-)  # cria a interface com tamanho 220x145
+    "NoDistractions", layout, size=(282, 210), icon="/icon.ico"
+)  # cria a interface com tamanho 282x210
 
 # tela do PySimpleGui
 while True:

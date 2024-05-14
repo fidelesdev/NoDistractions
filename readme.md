@@ -13,9 +13,9 @@
 #### 3. Com o executável selecionado, pressione **F2** e em seguida **Ctrl+C** para copiar o nome do mesmo.
 ![passo 3](assets/passo3.png)
 #### 4. Em seguida, feche a pasta atual do programa desejado e abra o arquivo **programs.txt**
-![passo 4.1](assets/passo4.png)
+![passo 4](assets/passo4.png)
 
-#### 5. Pressione **Ctrl+V**, digite **.exe** e salve as modificações com **Ctrl+S**. Isso irá informar para o NoDistracions quais programas deve impedir a execução.
-![passo ](assets/passo5.png)
+#### 5. Pressione **Ctrl+V** e salve as modificações com **Ctrl+S**. Isso irá informar para o NoDistracions quais programas deve impedir a execução.
+![passo 5](assets/passo5.png)
 
 
