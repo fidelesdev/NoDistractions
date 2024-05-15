@@ -3,18 +3,69 @@ from datetime import datetime
 from psutil import process_iter, pid_exists
 import subprocess
 from os import path, getcwd
+import json
 
-# verificar a url atual para obter os arquivos. a url atual do appCloser muda se for iniciada diretamente ou pela interface
+
+class Config:
+    def __init__(
+        self,
+        estado: bool = False,
+        hora_inicial: int = 0,
+        minuto_inicial: int = 0,
+        hora_final: int = 0,
+        minuto_final: int = 0,
+        dom: bool = False,
+        seg: bool = False,
+        ter: bool = False,
+        qua: bool = False,
+        qui: bool = False,
+        sex: bool = False,
+        sab: bool = False,
+    ) -> None:
+        self.estado = estado
+        self.hora_inicial = hora_inicial
+        self.minuto_inicial = minuto_inicial
+        self.hora_final = hora_final
+        self.minuto_final = minuto_final
+        self.dom = dom
+        self.seg = seg
+        self.ter = ter
+        self.qua = qua
+        self.qui = qui
+        self.sex = sex
+        self.sab = sab
+
 pastaAtual = str(path.basename(getcwd()))
-if pastaAtual == "ND_appCloser": 
-    urlConfig = r"..\config.txt" #pasta anterior
-    urlPrograms = r"..\programs.txt" #pasta anterior
+if pastaAtual == "ND_appCloser":
+    urlConfig = r"..\config.json"  # pasta anterior
+    urlPrograms = r"..\programs.txt"  # pasta anterior
 else:
-    urlConfig = "config.txt" #mesma pasta
-    urlPrograms = "programs.txt" #mesma pasta
+    urlConfig = "config.json"  # mesma pasta
+    urlPrograms = "programs.txt"  # mesma pasta
 
-print(urlConfig)
-print(urlPrograms)
+try:  # obtém os dados do config.json
+    with open(urlConfig, "r") as file:
+        config_data = json.load(file)
+
+    config = Config(
+        estado=config_data["estado"],
+        hora_inicial=config_data["hora_inicial"],
+        minuto_inicial=config_data["minuto_inicial"],
+        hora_final=config_data["hora_final"],
+        minuto_final=config_data["minuto_final"],
+        dom=config_data["dom"],
+        seg=config_data["seg"],
+        ter=config_data["ter"],
+        qua=config_data["qua"],
+        qui=config_data["qui"],
+        sex=config_data["sex"],
+        sab=config_data["sab"],
+    )
+
+
+except:  # caso o try dê erro, no caso o arquivo existe mas está vazio:
+    config = Config()
+
 
 # retorna uma lista com os pids dos programas
 def get_pid(p):
@@ -26,13 +77,12 @@ def get_pid(p):
         return pidlist
 
 
-# retorna hora e minuto
-
-
+# adiciona os ".exe" ao final de cada nome de programa no arquivo
 def addExe(program):
     return program + ".exe"
 
 
+# retorna hora e minuto
 def get_hora():
     horario = datetime.today()  # obtém o horario
     h, min = list(map(int, horario.strftime("%H %M").split()))
@@ -40,61 +90,21 @@ def get_hora():
     return h, min, weekday  # retorna uma lista com hora, minuto atual e dia da semana
 
 
-# abre a imagem
-
-
-# def nao():
-#     try:
-#          # cria a variavel pra imagem
-#         imagem = Image.open('../nao.PNG')
-#         # converte a imagem para o tipo PhotoImage(suportado pelo Tkinter)
-#         imagem = ImageTk.PhotoImage(imagem)
-#         # cria a janela
-#         janela = Tk()
-#         janela.overrideredirect(True)  # retira as bordas
-#         # posição da imagem
-#         # obtém a posição para fica no x central da tela
-#         x = int((janela.winfo_screenwidth() - imagem.width()) / 2)
-#         # obtém a posição para fica no y central da tela
-#         y = int((janela.winfo_screenheight() - imagem.height()) / 2)
-#         janela.geometry(f'+{x}+{y}')  # define o local da imagem na tela
-#         # cria o elemento de GUI (interface gráfica do usuário)
-#         label = Label(janela, image=imagem)
-#         label.pack()  # configura a posição do widget na janela
-#         janela.wm_attributes("-topmost", True)  # deixa a janela acima das outras
-#         # após 5seg, executa a função da referencia no 2° argumento
-#         janela.after(2500, janela.destroy)
-#         janela.mainloop()  # abre a imagem
-#     except:
-#         pass
-
-
 pid = int()
 pids = list()
-semana = ["Sunday", "Monday", "Tuesday",
-          "Wednesday", "Thursday", "Friday", "Saturday"]
-with open(urlConfig, "r") as arquivo:
-    config = arquivo.read().split()
 
-
-for x in range(1, 5):
-    config[x] = int(config[x])
-
+semana = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 h, min, ddsemana = get_hora()
 ddsemana = semana.index(ddsemana)
 tempo_agr = h * 60 + min
-tempo1 = config[1] * 60 + config[2]
-tempo2 = config[3] * 60 + config[4]
+tempo1 = int(config.hora_inicial) * 60 + int(config.minuto_inicial)
+tempo2 = int(config.hora_final) * 60 + int(config.minuto_final)
 
-for x in range(5, 12):
-    if config[x] == "True":
-        config[x] = True
 
-if config[0] == "True" and config[ddsemana + 5] == True:
-    estado = True
-else:
-    estado = False
+# verificar a url atual para obter os arquivos. a url atual do appCloser muda se for iniciada diretamente ou pela interface
 
+semanaConfig = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"]
+estado = getattr(config, semanaConfig[ddsemana])
 
 acessoNegado = []
 while tempo_agr <= tempo2:
@@ -133,7 +143,7 @@ while tempo_agr <= tempo2:
                     except:
                         pass
                 # if config[12] == "True":
-                    # nao()
+                # nao()
             else:
                 # print(f'não possui nenhum processo destes aberto')
                 pass
@@ -144,8 +154,5 @@ while tempo_agr <= tempo2:
     sleep(t)
     h, min, ddsemana = get_hora()
     ddsemana = semana.index(ddsemana)
-    if config[0] == "True":
-        if config[ddsemana + 5] == True:
-            estado = True
-    else:
-        estado = False
+    estado = getattr(config, semanaConfig[ddsemana])
+

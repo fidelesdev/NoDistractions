@@ -3,8 +3,8 @@ from os import system
 import PySimpleGUI as sg
 from psutil import process_iter
 from os import path
+import json
 
-comentario = ""
 
 for proc in process_iter(["pid", "name"]):
     if proc.info["name"] == "ND_appCloser.exe":
@@ -15,99 +15,89 @@ sg.theme("DarkGrey8")  # tema da interface
 horas = [str(i).zfill(2) for i in range(24)]  # intervalo da seleção de horario
 minutos = [str(i).zfill(2) for i in range(60)]  # intervalo da seleção de minuto
 
-try:  # se o arquivo existir(erro caso estiver vazio):
-    with open("./config.txt", "r") as arquivo:
-        config = arquivo.read().split()  # cria uma lista com o conteúdo do arquivo
-        print(config)
-    print(len(config))
-    if len(config) > 12:  # retira o comentario
 
-        for n in range(12, len(config)):
-            print(config[12])
-            comentario += config[12] + " "
-            del config[12]
+class Config:
+    def __init__(
+        self,
+        estado: bool = False,
+        hora_inicial: int = 0,
+        minuto_inicial: int = 0,
+        hora_final: int = 0,
+        minuto_final: int = 0,
+        dom: bool = False,
+        seg: bool = False,
+        ter: bool = False,
+        qua: bool = False,
+        qui: bool = False,
+        sex: bool = False,
+        sab: bool = False,
+    ) -> None:
+        self.estado = estado
+        self.hora_inicial = hora_inicial
+        self.minuto_inicial = minuto_inicial
+        self.hora_final = hora_final
+        self.minuto_final = minuto_final
+        self.dom = dom
+        self.seg = seg
+        self.ter = ter
+        self.qua = qua
+        self.qui = qui
+        self.sex = sex
+        self.sab = sab
 
-    if config[0] == "False":
-        config[0] = (
-            False  # tranforma a str 'False' em booleano False, pois bool('False') = True
-        )
-    elif config[0] == "True":
-        config[0] = True
-    else:
-        0 / 0
 
-    for n in range(
-        1, 5
-    ):  # resolve caso nao existe ou nao corresponde das horas e minutos
-        if str(config[n]).isnumeric():  # se for numerico
-            if 0 > int(config[n]) or int(config[n]) > 60:  # se for maior que 60
+try: # obtém os dados do config.json
+    with open('config.json', 'r') as file:
+        config_data = json.load(file)
 
-                0 / 0
-        else:
-            0 / 0
+    config = Config(
+        estado=config_data["estado"],
+        hora_inicial=config_data["hora_inicial"],
+        minuto_inicial=config_data["minuto_inicial"],
+        hora_final=config_data["hora_final"],
+        minuto_final=config_data["minuto_final"],
+        dom=config_data["dom"],
+        seg=config_data["seg"],
+        ter=config_data["ter"],
+        qua=config_data["qua"],
+        qui=config_data["qui"],
+        sex=config_data["sex"],
+        sab=config_data["sab"]
+    )
 
-    for n in range(5, 12):
-        if config[n] == "False":
-            config[n] = (
-                False  # tranforma a str 'False' em booleano False, pois bool('False') = True
-            )
-        elif config[n] == "True":
-            config[n] = True
-        else:
-            0 / 0
 
 except:  # caso o try dê erro, no caso o arquivo existe mas está vazio:
-    config = [
-        False,
-        "00",
-        "00",
-        "00",
-        "00",
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-        False,
-    ]  # estado, hora, min
+    config = Config() 
 
-for n, x in enumerate(config):
-    if x == "False":
-        config[n] = (
-            False  # tranforma a str 'False' em booleano False, pois bool('False') = True
-        )
-    elif x == "True":
-        config[n] = True
+
 print(config)
 
 
 layout = [
     [
-        sg.Checkbox("ativar/desativar programa", config[0])
+        sg.Checkbox("ativar/desativar programa", config.estado)
     ],  # caixa de seleção ativar/desativar
     [
-        sg.Combo(horas, default_value=config[1]),
+        sg.Combo(horas, default_value=config.hora_inicial),
         sg.Text(":"),
-        sg.Combo(minutos, default_value=config[2]),
+        sg.Combo(minutos, default_value=config.minuto_inicial),
     ],  # seleção de horario inicial
     [sg.Text("Até")],
     [
-        sg.Combo(horas, default_value=config[3]),
+        sg.Combo(horas, default_value=config.hora_final),
         sg.Text(":"),
-        sg.Combo(minutos, default_value=config[4]),
+        sg.Combo(minutos, default_value=config.minuto_final),
     ],  # seleção de horario final
     [sg.Text("dom  seg     ter     qua     qui    sex    sab")],
     [
-        sg.Checkbox("", config[5]),
-        sg.Checkbox("", config[6]),
-        sg.Checkbox("", config[7]),
-        sg.Checkbox("", config[8]),
-        sg.Checkbox("", config[9]),
-        sg.Checkbox("", config[10]),
-        sg.Checkbox("", config[11]),
+        sg.Checkbox("", config.dom),
+        sg.Checkbox("", config.seg),
+        sg.Checkbox("", config.ter),
+        sg.Checkbox("", config.qua),
+        sg.Checkbox("", config.qui),
+        sg.Checkbox("", config.sex),
+        sg.Checkbox("", config.sab),
     ],
-    # [sg.Checkbox('não!', config[12])],
     [sg.Submit("Salvar e sair"), sg.Text("", key="-SALVO-")],
 ]  # Salvar dados
 
@@ -128,24 +118,35 @@ while True:
         break
 
     # atribui valores na lista para inserir no arquivo
-    config[0] = str(values[0])
-    for x in range(1, 5):
-        config[x] = values[x]
-    for x in range(5, 12):
-        config[x] = str(values[x])
-
+    global novaConfig
+    novaConfig = Config(
+        values[0],
+        values[1],
+        values[2],
+        values[3],
+        values[4],
+        values[5],
+        values[6],
+        values[7],
+        values[8],
+        values[9],
+        values[10],
+        values[11]
+    )
+    novaConfig = vars(novaConfig)
+    print(values[0])
+    print(type(values[0]))
 
 window.close()  # fecha a interface
 
 # salva as informações no arquivo txt
-with open("./config.txt", "w") as arquivo:
-    for x in config:
-        arquivo.write(f"{x}\n")
-    # arquivo.write(f'\n {comentario}')
+with open("./config.json", "w") as arquivo:
+    json.dump(novaConfig, arquivo, indent=4)
 
 if not path.exists("./programs.txt"):
     with open("./programs.txt", "w") as programs:
         programs.write("")
 
-if config[0] == "True":
+if novaConfig["estado"]:
+    print("aq ta bom")
     Popen(r".\ND_appCloser\ND_appCloser.exe", shell=True)
