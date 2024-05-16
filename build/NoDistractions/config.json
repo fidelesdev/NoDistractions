@@ -1,0 +1,14 @@
+{
+    "estado": false,
+    "hora_inicial": "0",
+    "minuto_inicial": "0",
+    "hora_final": "00",
+    "minuto_final": "0",
+    "dom": false,
+    "seg": false,
+    "ter": false,
+    "qua": false,
+    "qui": false,
+    "sex": false,
+    "sab": false
+}

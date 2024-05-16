@@ -4,6 +4,7 @@ import PySimpleGUI as sg
 from psutil import process_iter
 from os import path
 import json
+from sys import exit
 
 
 for proc in process_iter(["pid", "name"]):
@@ -46,8 +47,8 @@ class Config:
         self.sab = sab
 
 
-try: # obtém os dados do config.json
-    with open('config.json', 'r') as file:
+try:  # obtém os dados do config.json
+    with open("config.json", "r") as file:
         config_data = json.load(file)
 
     config = Config(
@@ -62,12 +63,12 @@ try: # obtém os dados do config.json
         qua=config_data["qua"],
         qui=config_data["qui"],
         sex=config_data["sex"],
-        sab=config_data["sab"]
+        sab=config_data["sab"],
     )
 
 
 except:  # caso o try dê erro, no caso o arquivo existe mas está vazio:
-    config = Config() 
+    config = Config()
 
 
 print(config)
@@ -108,17 +109,17 @@ window = sg.Window(
 
 # tela do PySimpleGui
 while True:
+    global novaConfig
     event, values = window.read()  # abre a interface
     if event == "Salvar e sair":
         window["-SALVO-"].update("Configurações salvas!")
-
-    elif (
-        event == sg.WIN_CLOSED or event == "Cancel"
-    ):  # se o usuario fechar a janela ou clicar em cancelar
+    # se o usuario fechar a janela ou #TODO - clicar em cancelar  -> 1.3.0
+    elif event == sg.WIN_CLOSED or event == "Cancel":
+        if "novaConfig" not in globals():  # caso nao existir a instância da NovaConfig, logo, não ter salvo
+            exit() #encerra todo o resto do programa, não salvou da nisso fi
         break
 
     # atribui valores na lista para inserir no arquivo
-    global novaConfig
     novaConfig = Config(
         values[0],
         values[1],
@@ -131,22 +132,24 @@ while True:
         values[8],
         values[9],
         values[10],
-        values[11]
+        values[11],
     )
-    novaConfig = vars(novaConfig)
+
     print(values[0])
     print(type(values[0]))
 
 window.close()  # fecha a interface
 
 # salva as informações no arquivo txt
+print(novaConfig)
 with open("./config.json", "w") as arquivo:
-    json.dump(novaConfig, arquivo, indent=4)
+    json.dump(vars(novaConfig), arquivo, indent=4)
+    #Config -> dict
 
 if not path.exists("./programs.txt"):
     with open("./programs.txt", "w") as programs:
-        programs.write("")
+        programs.write("#A cada nome de programa pule uma linha")
 
-if novaConfig["estado"]:
+if novaConfig.estado:
     print("aq ta bom")
     Popen(r".\ND_appCloser\ND_appCloser.exe", shell=True)

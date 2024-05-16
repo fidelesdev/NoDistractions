@@ -35,36 +35,39 @@ class Config:
         self.sex = sex
         self.sab = sab
 
+
+# verificar a url atual para obter os arquivos. a url atual do appCloser muda se for iniciada diretamente ou pela interface
 pastaAtual = str(path.basename(getcwd()))
 if pastaAtual == "ND_appCloser":
-    urlConfig = r"..\config.json"  # pasta anterior
-    urlPrograms = r"..\programs.txt"  # pasta anterior
+    urlConfig = "..\\config.json"  # pasta anterior
+    urlPrograms = "..\\programs.txt"  # pasta anterior
 else:
     urlConfig = "config.json"  # mesma pasta
     urlPrograms = "programs.txt"  # mesma pasta
 
-try:  # obtém os dados do config.json
-    with open(urlConfig, "r") as file:
-        config_data = json.load(file)
+def getConfig(url):
+    try:  # obtém os dados do config.json
+        with open(url, "r") as file:
+            config_data = json.load(file)
 
-    config = Config(
-        estado=config_data["estado"],
-        hora_inicial=config_data["hora_inicial"],
-        minuto_inicial=config_data["minuto_inicial"],
-        hora_final=config_data["hora_final"],
-        minuto_final=config_data["minuto_final"],
-        dom=config_data["dom"],
-        seg=config_data["seg"],
-        ter=config_data["ter"],
-        qua=config_data["qua"],
-        qui=config_data["qui"],
-        sex=config_data["sex"],
-        sab=config_data["sab"],
-    )
-
-
-except:  # caso o try dê erro, no caso o arquivo existe mas está vazio:
-    config = Config()
+        config = Config(
+            estado=config_data["estado"],
+            hora_inicial=config_data["hora_inicial"],
+            minuto_inicial=config_data["minuto_inicial"],
+            hora_final=config_data["hora_final"],
+            minuto_final=config_data["minuto_final"],
+            dom=config_data["dom"],
+            seg=config_data["seg"],
+            ter=config_data["ter"],
+            qua=config_data["qua"],
+            qui=config_data["qui"],
+            sex=config_data["sex"],
+            sab=config_data["sab"],
+        )
+    except:  # caso nao exista ou esteja vazio:
+        config = Config() # valores padrões -> desativado
+        
+    return config
 
 
 # retorna uma lista com os pids dos programas
@@ -90,8 +93,7 @@ def get_hora():
     return h, min, weekday  # retorna uma lista com hora, minuto atual e dia da semana
 
 
-pid = int()
-pids = list()
+config = getConfig(urlConfig)
 
 semana = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 h, min, ddsemana = get_hora()
@@ -101,17 +103,28 @@ tempo1 = int(config.hora_inicial) * 60 + int(config.minuto_inicial)
 tempo2 = int(config.hora_final) * 60 + int(config.minuto_final)
 
 
-# verificar a url atual para obter os arquivos. a url atual do appCloser muda se for iniciada diretamente ou pela interface
+pid = int()
+pids = list()
 
 semanaConfig = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"]
-estado = getattr(config, semanaConfig[ddsemana])
+estadoDia = getattr(config, semanaConfig[ddsemana])
 
 acessoNegado = []
 while tempo_agr <= tempo2:
-    with open(urlPrograms, "r") as arquivo:
-        pBruto = arquivo.read().split()
-        p = list(map(addExe, pBruto))
-    if estado == True:
+    config = getConfig(urlConfig)
+    try:
+        with open(urlPrograms, "r") as arquivo:
+            pBruto = arquivo.read().split("\n")
+            for x in pBruto:
+                if x[0] == "#":
+                    pBruto.remove(x)
+            print(pBruto)
+            p = list(map(addExe, pBruto))
+    except:
+        with open(urlPrograms, "w") as arquivo:
+            arquivo.write("#A cada nome de programa pule uma linha")
+            p = []
+    if config.estado and estadoDia:
         print(tempo_agr, tempo1, tempo2)
         if tempo1 <= tempo_agr:
             print("check 1")
@@ -154,5 +167,4 @@ while tempo_agr <= tempo2:
     sleep(t)
     h, min, ddsemana = get_hora()
     ddsemana = semana.index(ddsemana)
-    estado = getattr(config, semanaConfig[ddsemana])
-
+    estadoDia = getattr(config, semanaConfig[ddsemana])
