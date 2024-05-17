@@ -32,6 +32,7 @@ class Config:
         qui: bool = False,
         sex: bool = False,
         sab: bool = False,
+        programs: str = "",
     ) -> None:
         self.estado = estado
         self.hora_inicial = hora_inicial
@@ -45,12 +46,14 @@ class Config:
         self.qui = qui
         self.sex = sex
         self.sab = sab
+        self.programs = programs
+        
 
 
 try:  # obtém os dados do config.json
     with open("config.json", "r") as file:
         config_data = json.load(file)
-
+    print(config_data)
     config = Config(
         estado=config_data["estado"],
         hora_inicial=config_data["hora_inicial"],
@@ -64,6 +67,7 @@ try:  # obtém os dados do config.json
         qui=config_data["qui"],
         sex=config_data["sex"],
         sab=config_data["sab"],
+        programs=config_data["programs"]
     )
 
 
@@ -79,15 +83,15 @@ layout = [
         sg.Checkbox("ativar/desativar programa", config.estado)
     ],  # caixa de seleção ativar/desativar
     [
-        sg.Combo(horas, default_value=config.hora_inicial),
+        sg.Combo(horas, default_value=str(config.hora_inicial).zfill(2)),
         sg.Text(":"),
-        sg.Combo(minutos, default_value=config.minuto_inicial),
+        sg.Combo(minutos, default_value=str(config.minuto_inicial).zfill(2)),
     ],  # seleção de horario inicial
     [sg.Text("Até")],
     [
-        sg.Combo(horas, default_value=config.hora_final),
+        sg.Combo(horas, default_value=str(config.hora_final).zfill(2)),
         sg.Text(":"),
-        sg.Combo(minutos, default_value=config.minuto_final),
+        sg.Combo(minutos, default_value=str(config.minuto_final).zfill(2)),
     ],  # seleção de horario final
     [sg.Text("dom  seg     ter     qua     qui    sex    sab")],
     [
@@ -99,22 +103,24 @@ layout = [
         sg.Checkbox("", config.sex),
         sg.Checkbox("", config.sab),
     ],
-    [sg.Submit("Salvar e sair"), sg.Text("", key="-SALVO-")],
+    [sg.Text("Digite os programas que serão fechados:")],
+    [sg.Multiline(config.programs, size=(150,1),expand_y=True)],
+    [sg.Cancel("Cancelar"),sg.Submit("Salvar",button_color="#24a"), sg.Text("", key="-SALVO-")],
 ]  # Salvar dados
 
 
 window = sg.Window(
-    "NoDistractions", layout, size=(282, 210), icon="/icon.ico"
+    "NoDistractions", layout, size=(282, 330), icon="/icon.ico"
 )  # cria a interface com tamanho 282x210
 
 # tela do PySimpleGui
 while True:
     global novaConfig
     event, values = window.read()  # abre a interface
-    if event == "Salvar e sair":
+    if event == "Salvar":
         window["-SALVO-"].update("Configurações salvas!")
-    # se o usuario fechar a janela ou #TODO - clicar em cancelar  -> 1.3.0
-    elif event == sg.WIN_CLOSED or event == "Cancel":
+    # se o usuario fechar a janela ou clicar em cancelar
+    elif event == sg.WIN_CLOSED or event == "Cancelar":
         if "novaConfig" not in globals():  # caso nao existir a instância da NovaConfig, logo, não ter salvo
             exit() #encerra todo o resto do programa, não salvou da nisso fi
         break
@@ -133,8 +139,9 @@ while True:
         values[9],
         values[10],
         values[11],
+        values[12]
     )
-
+    print(values)
     print(values[0])
     print(type(values[0]))
 
@@ -146,9 +153,9 @@ with open("./config.json", "w") as arquivo:
     json.dump(vars(novaConfig), arquivo, indent=4)
     #Config -> dict
 
-if not path.exists("./programs.txt"):
-    with open("./programs.txt", "w") as programs:
-        programs.write("#A cada nome de programa pule uma linha")
+#! if not path.exists("./programs.txt"):
+#!     with open("./programs.txt", "w") as programs:
+#!         programs.write("#A cada nome de programa pule uma linha")
 
 if novaConfig.estado:
     print("aq ta bom")

@@ -21,6 +21,7 @@ class Config:
         qui: bool = False,
         sex: bool = False,
         sab: bool = False,
+        programs: str = "",
     ) -> None:
         self.estado = estado
         self.hora_inicial = hora_inicial
@@ -34,16 +35,17 @@ class Config:
         self.qui = qui
         self.sex = sex
         self.sab = sab
+        self.programs = programs
 
 
 # verificar a url atual para obter os arquivos. a url atual do appCloser muda se for iniciada diretamente ou pela interface
 pastaAtual = str(path.basename(getcwd()))
 if pastaAtual == "ND_appCloser":
     urlConfig = "..\\config.json"  # pasta anterior
-    urlPrograms = "..\\programs.txt"  # pasta anterior
+    #! urlPrograms = "..\\programs.txt"  # pasta anterior
 else:
     urlConfig = "config.json"  # mesma pasta
-    urlPrograms = "programs.txt"  # mesma pasta
+    #! urlPrograms = "programs.txt"  # mesma pasta
 
 def getConfig(url):
     try:  # obtém os dados do config.json
@@ -63,6 +65,7 @@ def getConfig(url):
             qui=config_data["qui"],
             sex=config_data["sex"],
             sab=config_data["sab"],
+            programs=config_data["programs"]
         )
     except:  # caso nao exista ou esteja vazio:
         config = Config() # valores padrões -> desativado
@@ -108,22 +111,25 @@ pids = list()
 
 semanaConfig = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"]
 estadoDia = getattr(config, semanaConfig[ddsemana])
-
+print(config.programs)
 acessoNegado = []
 while tempo_agr <= tempo2:
     config = getConfig(urlConfig)
     try:
-        with open(urlPrograms, "r") as arquivo:
-            pBruto = arquivo.read().split("\n")
-            for x in pBruto:
-                if x[0] == "#":
-                    pBruto.remove(x)
-            print(pBruto)
-            p = list(map(addExe, pBruto))
+        #! with open(urlPrograms, "r") as arquivo:
+        
+        pBruto = config.programs.split("\n")
+        print(pBruto)
+        for x in pBruto:
+            if x[0] == "#":
+                pBruto.remove(x)
+
+        p = list(map(addExe, pBruto))
     except:
-        with open(urlPrograms, "w") as arquivo:
-            arquivo.write("#A cada nome de programa pule uma linha")
-            p = []
+        pass
+        #! with open(urlPrograms, "w") as arquivo:
+        #!     arquivo.write("#A cada nome de programa pule uma linha")
+        #!     p = []
     if config.estado and estadoDia:
         print(tempo_agr, tempo1, tempo2)
         if tempo1 <= tempo_agr:
