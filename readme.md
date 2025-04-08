@@ -1,4 +1,4 @@
-# NoDistracions
+# NoDistractions
 
 ### O programa NoDistracions é capaz auxiliar no foco, terminando a execução de programas e aplicativos selecionados que retiram a atenção do usuário.
 
